@@ -84,6 +84,14 @@ namespace NUnit.Framework.Internal.Filters
         }
 
         [Test]
+        public void ExplicitAttributeMatchTest()
+        {
+            var filter = new NotFilter(new CategoryFilter("Dummy"));
+
+            Assert.False(filter.IsExplicitMatch(_explicitFixture));
+        }
+
+        [Test]
         public void BuildFromXml()
         {
             TestFilter filter = TestFilter.FromXml(
