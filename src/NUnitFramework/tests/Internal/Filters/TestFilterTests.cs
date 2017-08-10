@@ -71,6 +71,7 @@ namespace NUnit.Framework.Internal.Filters
         protected readonly TestSuite _nestingFixture = TestBuilder.MakeFixture(typeof(NestingFixture));
         protected readonly TestSuite _nestedFixture = TestBuilder.MakeFixture(typeof(NestingFixture.NestedFixture));
         protected readonly TestSuite _emptyNestedFixture = TestBuilder.MakeFixture(typeof(NestingFixture.EmptyNestedFixture));
+        protected readonly TestSuite _explicitFixture = TestBuilder.MakeFixture(typeof(ExplicitFixture));
         protected readonly TestSuite _topLevelSuite = new TestSuite("MySuite");
 
         [OneTimeSetUp]
@@ -124,6 +125,12 @@ namespace NUnit.Framework.Internal.Filters
             }
 
             internal class EmptyNestedFixture { }
+        }
+
+        [Explicit, Category("Dummy")]
+        private class ExplicitFixture
+        {
+
         }
         #endregion
     }

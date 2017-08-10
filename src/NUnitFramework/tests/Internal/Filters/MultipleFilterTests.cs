@@ -1,0 +1,14 @@
+﻿namespace NUnit.Framework.Internal.Filters
+{
+    public class MultipleFilterTests : TestFilterTests
+    {
+        [Test]
+        public void TestExplicitNotSelected()
+        {
+            //where cat==Dummy || cat!=Dummy
+            var filter = new OrFilter(new NotFilter(new CategoryFilter("Dummy")), new CategoryFilter("Dummy"));
+
+            Assert.False(filter.Match(_explicitFixture));
+        }
+    }
+}
