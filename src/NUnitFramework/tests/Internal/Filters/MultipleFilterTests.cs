@@ -8,8 +8,8 @@
             //where cat==Dummy || cat!=Dummy
             var filter = new OrFilter(new NotFilter(new CategoryFilter("Dummy")), new CategoryFilter("Dummy"));
 
+            Assert.That(filter.Pass(_explicitFixture));
             Assert.False(filter.IsExplicitMatch(_explicitFixture));
-            Assert.False(filter.Pass(_explicitFixture));
         }
     }
 }
