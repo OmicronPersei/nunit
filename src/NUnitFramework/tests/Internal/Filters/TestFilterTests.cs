@@ -127,7 +127,7 @@ namespace NUnit.Framework.Internal.Filters
             internal class EmptyNestedFixture { }
         }
 
-        [Explicit, Category("Dummy")]
+        [Explicit]
         private class ExplicitFixture
         {
 
