@@ -85,34 +85,61 @@ namespace NUnit.Framework.Internal
         }
 
         [Test]
-        public void TestResolveTypeNameDifferenceNonGeneric()
+        public void TestResolveTypeNameDifferenceNonGenericDifferingTypes()
         {
             var actual = new Dummy(1);
             var expected = new Dummy1(1);
 
             string actualStr, expectedStr;
 
+            //_differenceGetter.ShortenTypeNames(
+            //     expected, actual, out expectedStr, out actualStr);
+
+            //Assert.That(expectedStr, Is.EqualTo("TypeNameDifferenceTests+Dummy1"));
+            //Assert.That(actualStr, Is.EqualTo("TypeNameDifferenceTests+Dummy"));
+
             _differenceGetter.ResolveTypeNameDifference(
-                expected, actual, out expectedStr, out actualStr);
+                 expected, actual, out expectedStr, out actualStr);
 
             Assert.That(expectedStr, Is.EqualTo("TypeNameDifferenceTests+Dummy1"));
             Assert.That(actualStr, Is.EqualTo("TypeNameDifferenceTests+Dummy"));
         }
 
-        //[Test]
-        //public void TestResolveTypeNameDifferenceGeneric()
-        //{
-        //    var actual = new DummyTemplatedClass<Dummy>(new Dummy(1));
-        //    var expected = new DummyTemplatedClass<Dummy>(new Dummy1(1));
+        [Test]
+        public void TestResolveTypeNameDifferenceNonGenericNonDifferingTypes()
+        {
+            var actual = new Dummy(1);
+            var expected = new Dummy(1);
 
-        //    string actualStr, expectedStr;
+            string actualStr, expectedStr;
 
-        //    _differenceGetter.ResolveTypeNameDifference(
-        //        expected, actual, out expectedStr, out actualStr);
+            //_differenceGetter.ShortenTypeNames(
+            //     expected, actual, out expectedStr, out actualStr);
 
-        //    Assert.That(expectedStr, Is.EqualTo("DummyTemplatedClass`1[TypeNameDifferenceTests+Dummy1]"));
-        //    Assert.That(actualStr, Is.EqualTo("DummyTemplatedClass`1[TypeNameDifferenceTests+Dummy]"));
-        //}
+            //Assert.That(expectedStr, Is.EqualTo("TypeNameDifferenceTests+Dummy"));
+            //Assert.That(actualStr, Is.EqualTo("TypeNameDifferenceTests+Dummy"));
+
+            _differenceGetter.ResolveTypeNameDifference(
+                 expected, actual, out expectedStr, out actualStr);
+
+            Assert.That(expectedStr, Is.EqualTo("TypeNameDifferenceTests+Dummy"));
+            Assert.That(actualStr, Is.EqualTo("TypeNameDifferenceTests+Dummy"));
+        }
+
+        [Test]
+        public void TestResolveTypeNameDifferenceGeneric()
+        {
+            var expected = new DummyTemplatedClass<Dummy1>(new Dummy(1));
+            var actual = new DummyTemplatedClass<Dummy>(new Dummy(1));
+
+            string actualStr, expectedStr;
+
+            _differenceGetter.ResolveTypeNameDifference(
+                expected, actual, out expectedStr, out actualStr);
+
+            Assert.That(expectedStr, Is.EqualTo("TypeNameDifferenceTests+DummyTemplatedClass`1[TypeNameDifferenceTests+Dummy1]"));
+            Assert.That(actualStr, Is.EqualTo("TypeNameDifferenceTests+DummyTemplatedClass`1[TypeNameDifferenceTests+Dummy]"));
+        }
 
         [Test]
         public void TestIsObjectInstanceGeneric()
@@ -179,6 +206,8 @@ namespace NUnit.Framework.Internal
 
             Assert.AreEqual(expected, actual);
         }
+
+        //TODO: create tests for mismatching amount of templated params.
 
         //TODO: create test for nested generics
     }

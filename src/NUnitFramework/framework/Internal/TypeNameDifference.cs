@@ -41,49 +41,65 @@ namespace NUnit.Framework.Internal
         /// <param name="actualType">Output of the unique type name for actual</param>
         public void ResolveTypeNameDifference(object expected, object actual, out string expectedType, out string actualType)
         {
-            //string expectedFullType = expected.GetType().ToString();
-            //string actualFullType = actual.GetType().ToString();
+            string expectedFullType = expected.GetType().ToString();
+            string actualFullType = actual.GetType().ToString();
 
-            //if (IsObjectTypeGeneric(expected) && IsObjectTypeGeneric(actual))
-            //{
-            //    string toplevelGenericExpected = GetTopLevelGenericType(expectedFullType);
-            //    string toplevelGenericActual = GetTopLevelGenericType(actualFullType);
+            if (IsObjectTypeGeneric(expected) && IsObjectTypeGeneric(actual))
+            {
+                string toplevelGenericExpected = GetTopLevelGenericType(expectedFullType);
+                string toplevelGenericActual = GetTopLevelGenericType(actualFullType);
 
-            //    string shortenedTopLevelGenericExpected, shortenedTopLevelGenericActual;
-            //    ShortenDifferingTypeNames(
-            //        out shortenedTopLevelGenericExpected,
-            //        out shortenedTopLevelGenericActual,
-            //        toplevelGenericExpected,
-            //        toplevelGenericActual);
+                string shortenedTopLevelGenericExpected, shortenedTopLevelGenericActual;
+                ShortenTypeNames(
+                    toplevelGenericExpected,
+                    toplevelGenericActual,
+                    out shortenedTopLevelGenericExpected,
+                    out shortenedTopLevelGenericActual);
 
-            //    List<string> templateParamsExpected = GetFullyQualifiedGenericParameters(expected);
-            //    List<string> templateParamsActual = GetFullyQualifiedGenericParameters(actual);
+                List<string> templateParamsExpected = GetFullyQualifiedGenericParameters(expected);
+                List<string> templateParamsActual = GetFullyQualifiedGenericParameters(actual);
 
-            //    List<string> shortenedParamsExpected = new List<string>();
-            //    List<string> shortenedParamsActual = new List<string>();
+                List<string> shortenedParamsExpected = new List<string>();
+                List<string> shortenedParamsActual = new List<string>();
 
-            //    for (int i = 0; i < templateParamsExpected.Count; ++i)
-            //    {
-            //        string shortenedExpected, shortenedActual;
-            //        ShortenDifferingTypeNames(out shortenedExpected, out shortenedActual, templateParamsExpected[i], templateParamsActual[i]);
+                for (int i = 0; i < templateParamsExpected.Count; ++i)
+                {
+                    string shortenedExpected, shortenedActual;
+                    ShortenTypeNames(templateParamsExpected[i], templateParamsActual[i], out shortenedExpected, out shortenedActual);
 
-            //        shortenedParamsExpected.Add(shortenedExpected);
-            //        shortenedParamsActual.Add(shortenedActual);
-            //    }
-            //}
-            //else
-            //{
-                ShortenDifferingTypeNames(out expectedType, out actualType, expected.GetType().ToString(), actual.GetType().ToString());
-            //}
+                    shortenedParamsExpected.Add(shortenedExpected);
+                    shortenedParamsActual.Add(shortenedActual);
+                }
+
+                string reconstructedShortenedExpected = ReconstructShortenedGenericTypeName(
+                    shortenedTopLevelGenericExpected, shortenedParamsExpected);
+                string reconstructedShortenedActual = ReconstructShortenedGenericTypeName(
+                    shortenedTopLevelGenericActual, shortenedParamsActual);
+
+                expectedType = reconstructedShortenedExpected;
+                actualType = reconstructedShortenedActual;
+            }
+            else
+            {
+                ShortenTypeNames(expected.GetType().ToString(), actual.GetType().ToString(), out expectedType, out actualType);
+            }
 
 
         }
 
-        private static void ShortenDifferingTypeNames(out string expectedTypeShortened, out string actualTypeShortened, string expectedOriginalType, string actualOriginalType)
+        /// <summary>
+        /// Shorten the given type names by only including the relevant differing types, if they differ.
+        /// </summary>
+        /// <param name="expectedTypeShortened">The shortened expected type.</param>
+        /// <param name="actualTypeShortened">The shortened actual type.</param>
+        /// <param name="expectedOriginalType">The expected type.</param>
+        /// <param name="actualOriginalType">The actual type.</param>
+        public void ShortenTypeNames(string expectedOriginalType, string actualOriginalType, out string expectedTypeShortened, out string actualTypeShortened)
         {
             string[] expectedOriginalTypeSplit = expectedOriginalType.Split('.');
             string[] actualOriginalTypeSplit = actualOriginalType.Split('.');
 
+            bool differenceDetected = false;
             int actualStart = 0, expectStart = 0;
             for (int expectLen = expectedOriginalTypeSplit.Length - 1, actualLen = actualOriginalTypeSplit.Length - 1;
                 expectLen >= 0 && actualLen >= 0;
@@ -93,11 +109,22 @@ namespace NUnit.Framework.Internal
                 {
                     actualStart = actualLen;
                     expectStart = expectLen;
+                    differenceDetected = true;
                     break;
                 }
             }
-            expectedTypeShortened = String.Join(".", expectedOriginalTypeSplit, expectStart, expectedOriginalTypeSplit.Length - expectStart);
-            actualTypeShortened = String.Join(".", actualOriginalTypeSplit, actualStart, actualOriginalTypeSplit.Length - actualStart);
+
+            if (differenceDetected)
+            {
+                expectedTypeShortened = String.Join(".", expectedOriginalTypeSplit, expectStart, expectedOriginalTypeSplit.Length - expectStart);
+                actualTypeShortened = String.Join(".", actualOriginalTypeSplit, actualStart, actualOriginalTypeSplit.Length - actualStart);
+            }
+            else
+            {
+                expectedTypeShortened = expectedOriginalTypeSplit[expectedOriginalTypeSplit.Length - 1];
+                actualTypeShortened = actualOriginalTypeSplit[actualOriginalTypeSplit.Length - 1];
+            }
+            
         }
 
         /// <summary>
