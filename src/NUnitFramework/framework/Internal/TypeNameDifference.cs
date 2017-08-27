@@ -16,9 +16,11 @@ namespace NUnit.Framework.Internal
         /// <param name="actualType">Output of the unique type name for actual</param>
         public void ResolveTypeNameDifference(object expected, object actual, out string expectedType, out string actualType)
         {
-            string expectedTypeStr = expected.GetType().ToString();
-            string actualTypeSTr = actual.GetType().ToString();
+            ResolveSingularTypeNameDifference(expected, actual, out expectedType, out actualType);
+        }
 
+        private static void ResolveSingularTypeNameDifference(object expected, object actual, out string expectedType, out string actualType)
+        {
             string[] expectedOriginalType = expected.GetType().ToString().Split('.');
             string[] actualOriginalType = actual.GetType().ToString().Split('.');
             int actualStart = 0, expectStart = 0;
