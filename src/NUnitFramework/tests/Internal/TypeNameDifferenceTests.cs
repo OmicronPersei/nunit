@@ -21,6 +21,8 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 // ***********************************************************************
 
+using System;
+
 namespace NUnit.Framework.Internal
 {
     public class TypeNameDifferenceTests
@@ -96,19 +98,51 @@ namespace NUnit.Framework.Internal
             Assert.That(actualStr, Is.EqualTo("TypeNameDifferenceTests+Dummy"));
         }
 
+        //[Test]
+        //public void TestResolveTypeNameDifferenceGeneric()
+        //{
+        //    var actual = new DummyTemplatedClass<Dummy>(new Dummy(1));
+        //    var expected = new DummyTemplatedClass<Dummy>(new Dummy1(1));
+
+        //    string actualStr, expectedStr;
+
+        //    _differenceGetter.ResolveTypeNameDifference(
+        //        expected, actual, out expectedStr, out actualStr);
+
+        //    Assert.That(expectedStr, Is.EqualTo("DummyTemplatedClass`1[TypeNameDifferenceTests+Dummy1]"));
+        //    Assert.That(actualStr, Is.EqualTo("DummyTemplatedClass`1[TypeNameDifferenceTests+Dummy]"));
+        //}
+
         [Test]
-        public void TestResolveTypeNameDifferenceGeneric()
+        public void TestIsObjectInstanceGeneric()
         {
-            var actual = new DummyTemplatedClass<Dummy>(new Dummy(1));
-            var expected = new DummyTemplatedClass<Dummy>(new Dummy1(1));
+            var notGeneric = new Dummy(1);
 
-            string actualStr, expectedStr;
+            Assert.False(_differenceGetter.IsObjectTypeGeneric(notGeneric));
 
-            _differenceGetter.ResolveTypeNameDifference(
-                expected, actual, out expectedStr, out actualStr);
+            var generic = new DummyTemplatedClass<Dummy>(new Dummy(1));
 
-            Assert.That(expectedStr, Is.EqualTo("DummyTemplatedClass`1[TypeNameDifferenceTests+Dummy1]"));
-            Assert.That(actualStr, Is.EqualTo("DummyTemplatedClass`1[TypeNameDifferenceTests+Dummy]"));
+            Assert.That(_differenceGetter.IsObjectTypeGeneric(generic));
+        }
+
+        [Test]
+        public void TestGetTopLevelGenericName()
+        {
+            var generic = new DummyTemplatedClass<Dummy>(new Dummy(1)).GetType().ToString();
+
+            var expected = "NUnit.Framework.Internal.TypeNameDifferenceTests+DummyTemplatedClass`1";
+
+            var actual = _differenceGetter.GetTopLevelGenericType(generic);
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void TestGetTopLevelGenericNameThrowsWhenNotGeneric()
+        {
+            var notGeneric = new Dummy(1).GetType().ToString();
+
+            Assert.Throws<ArgumentException>(() => _differenceGetter.GetTopLevelGenericType(notGeneric));
         }
 
         //TODO: create test for nested generics

@@ -39,7 +39,16 @@ namespace NUnit.Framework.Internal
         /// <param name="actualType">Output of the unique type name for actual</param>
         public void ResolveTypeNameDifference(object expected, object actual, out string expectedType, out string actualType)
         {
-            ShortenDifferingTypeNames(out expectedType, out actualType, expected.GetType().ToString(), actual.GetType().ToString());
+            //if (IsObjectTypeGeneric(expected) && IsObjectTypeGeneric(actual))
+            //{
+
+            //}
+            //else
+            //{
+                ShortenDifferingTypeNames(out expectedType, out actualType, expected.GetType().ToString(), actual.GetType().ToString());
+            //}
+            
+
         }
 
         private static void ShortenDifferingTypeNames(out string expectedTypeShortened, out string actualTypeShortened, string expectedOriginalType, string actualOriginalType)
@@ -61,6 +70,37 @@ namespace NUnit.Framework.Internal
             }
             expectedTypeShortened = String.Join(".", expectedOriginalTypeSplit, expectStart, expectedOriginalTypeSplit.Length - expectStart);
             actualTypeShortened = String.Join(".", actualOriginalTypeSplit, actualStart, actualOriginalTypeSplit.Length - actualStart);
+        }
+
+        /// <summary>
+        /// Returns whether or not the object is a generic type.
+        /// </summary>
+        /// <param name="obj">The <see cref="object"/> to check if is generic.</param>
+        /// <remarks>Used for cross-compatability between .NET and .NETCore.</remarks>
+        public bool IsObjectTypeGeneric(object obj)
+        {
+#if NETSTANDARD1_3 || NETSTANDARD1_6
+            return obj.GetType().IsConstructedGenericType;
+#else
+            return obj.GetType().IsGenericType;
+#endif
+        }
+
+        /// <summary>
+        /// Returns the top level generic type of a given fully qualified type name.
+        /// </summary>
+        /// <param name="TypeFullName">The fully qualified name to resolve.</param>
+        public string GetTopLevelGenericType(string TypeFullName)
+        {
+            if (TypeFullName.Contains("["))
+            {
+                return TypeFullName.Split('[')[0];
+            }
+            else
+            {
+                throw new ArgumentException("The given " + nameof(TypeFullName) + " does not represent a generic type.");
+            }
+            
         }
     }
 }
