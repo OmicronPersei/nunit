@@ -666,6 +666,52 @@ namespace NUnit.Framework.Constraints
             Assert.AreEqual(ex.Message, "  Expected: 0 (Int32)"+ NL + "  But was:  0 (IntPtr)"+ NL);
         }
 
+        class Dummy
+        {
+            internal readonly int value;
+
+            public Dummy(int value)
+            {
+                this.value = value;
+            }
+
+            public override string ToString()
+            {
+                return "Dummy " + value;
+            }
+        }
+
+        class Dummy1
+        {
+            internal readonly int value;
+
+            public Dummy1(int value)
+            {
+                this.value = value;
+            }
+
+            public override string ToString()
+            {
+                return "Dummy " + value;
+            }
+        }
+
+        [Test]
+        public void SomeTest()
+        {
+            var d1 = new Dummy(12);
+            var d2 = new Dummy1(12);
+            var kvp1 = new KeyValuePair<Dummy, string>(d1, "");
+            var kvp2 = new KeyValuePair<Dummy1, string>(d2, "");
+
+            var ex = Assert.Throws<AssertionException>(() => Assert.AreEqual(kvp1, kvp2));
+            var expectedMsg =
+                "  Expected: [<Dummy 12>, <string.Empty>] (EqualConstraintTests+Dummy,System.String])" + Environment.NewLine +
+                "  But was:  [<Dummy 12>, <string.Empty>] (EqualConstraintTests+Dummy1,System.String])" + Environment.NewLine;
+
+            Assert.AreEqual(expectedMsg, ex.Message);
+        }
+
         [Test]
         public void SameValueAndTypeButDifferentReferenceShowNotShowTypeDifference()
         {
