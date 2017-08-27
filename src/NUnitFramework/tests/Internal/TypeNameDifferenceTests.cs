@@ -168,6 +168,18 @@ namespace NUnit.Framework.Internal
             CollectionAssert.AreEquivalent(expected, actual);
         }
 
+        [Test]
+        public void TestReconstructShortenedGenericTypeName()
+        {
+            var expected = "KeyValuePair`2[String,Int32]";
+
+            var actual = _differenceGetter.ReconstructShortenedGenericTypeName(
+                "KeyValuePair`2",
+                new List<string>() { "String", "Int32" });
+
+            Assert.AreEqual(expected, actual);
+        }
+
         //TODO: create test for nested generics
     }
 }

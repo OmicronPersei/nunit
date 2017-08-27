@@ -41,8 +41,8 @@ namespace NUnit.Framework.Internal
         /// <param name="actualType">Output of the unique type name for actual</param>
         public void ResolveTypeNameDifference(object expected, object actual, out string expectedType, out string actualType)
         {
-            string expectedFullType = expected.GetType().ToString();
-            string actualFullType = actual.GetType().ToString();
+            //string expectedFullType = expected.GetType().ToString();
+            //string actualFullType = actual.GetType().ToString();
 
             //if (IsObjectTypeGeneric(expected) && IsObjectTypeGeneric(actual))
             //{
@@ -51,15 +51,25 @@ namespace NUnit.Framework.Internal
 
             //    string shortenedTopLevelGenericExpected, shortenedTopLevelGenericActual;
             //    ShortenDifferingTypeNames(
-            //        out shortenedTopLevelGenericExpected, 
-            //        out shortenedTopLevelGenericActual, 
-            //        toplevelGenericExpected, 
+            //        out shortenedTopLevelGenericExpected,
+            //        out shortenedTopLevelGenericActual,
+            //        toplevelGenericExpected,
             //        toplevelGenericActual);
 
-            //    List<string> shortenedTemplateParamsExpected = new List<string>();
-            //    List<string> shortenedTemplateParamsActual = new List<string>();
-            //    expected.GetType().getgene
+            //    List<string> templateParamsExpected = GetFullyQualifiedGenericParameters(expected);
+            //    List<string> templateParamsActual = GetFullyQualifiedGenericParameters(actual);
 
+            //    List<string> shortenedParamsExpected = new List<string>();
+            //    List<string> shortenedParamsActual = new List<string>();
+
+            //    for (int i = 0; i < templateParamsExpected.Count; ++i)
+            //    {
+            //        string shortenedExpected, shortenedActual;
+            //        ShortenDifferingTypeNames(out shortenedExpected, out shortenedActual, templateParamsExpected[i], templateParamsActual[i]);
+
+            //        shortenedParamsExpected.Add(shortenedExpected);
+            //        shortenedParamsActual.Add(shortenedActual);
+            //    }
             //}
             //else
             //{
@@ -130,7 +140,17 @@ namespace NUnit.Framework.Internal
             {
                 throw new ArgumentException("The given " + nameof(TypeFullName) + " does not represent a generic type.");
             }
-            
+        }
+
+        /// <summary>
+        /// Reconstruct a generic type name using the provided generic type name, and a
+        /// list of the template parameters.
+        /// </summary>
+        /// <param name="GenericType">The name of the generic type.</param>
+        /// <param name="TemplateParams">A list of names of the template parameters of the provided generic type.</param>
+        public string ReconstructShortenedGenericTypeName(string GenericType, List<string> TemplateParams)
+        {
+            return GenericType + "[" + string.Join(",", TemplateParams.ToArray()) + "]";
         }
     }
 }
