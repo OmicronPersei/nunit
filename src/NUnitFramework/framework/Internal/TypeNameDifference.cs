@@ -22,6 +22,8 @@
 // ***********************************************************************
 
 using System;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 namespace NUnit.Framework.Internal
 {
@@ -39,15 +41,31 @@ namespace NUnit.Framework.Internal
         /// <param name="actualType">Output of the unique type name for actual</param>
         public void ResolveTypeNameDifference(object expected, object actual, out string expectedType, out string actualType)
         {
+            string expectedFullType = expected.GetType().ToString();
+            string actualFullType = actual.GetType().ToString();
+
             //if (IsObjectTypeGeneric(expected) && IsObjectTypeGeneric(actual))
             //{
+            //    string toplevelGenericExpected = GetTopLevelGenericType(expectedFullType);
+            //    string toplevelGenericActual = GetTopLevelGenericType(actualFullType);
+
+            //    string shortenedTopLevelGenericExpected, shortenedTopLevelGenericActual;
+            //    ShortenDifferingTypeNames(
+            //        out shortenedTopLevelGenericExpected, 
+            //        out shortenedTopLevelGenericActual, 
+            //        toplevelGenericExpected, 
+            //        toplevelGenericActual);
+
+            //    List<string> shortenedTemplateParamsExpected = new List<string>();
+            //    List<string> shortenedTemplateParamsActual = new List<string>();
+            //    expected.GetType().getgene
 
             //}
             //else
             //{
                 ShortenDifferingTypeNames(out expectedType, out actualType, expected.GetType().ToString(), actual.GetType().ToString());
             //}
-            
+
 
         }
 
@@ -84,6 +102,18 @@ namespace NUnit.Framework.Internal
 #else
             return obj.GetType().IsGenericType;
 #endif
+        }
+
+        /// <summary>
+        /// Get the fully qualified name of the generic parameters of a given object.
+        /// </summary>
+        /// <param name="obj">The <see cref="object"/> to get the generic parameters of.</param>
+        public List<string> GetFullyQualifiedGenericParameters(object obj)
+        {
+            var name = obj.GetType().ToString();
+            var regex = new Regex(@"\[(.+)\]");
+            var match = regex.Match(name);
+            return new List<string>(match.Groups[1].Value.Split(','));
         }
 
         /// <summary>

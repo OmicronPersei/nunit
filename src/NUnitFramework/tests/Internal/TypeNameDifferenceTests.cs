@@ -22,6 +22,7 @@
 // ***********************************************************************
 
 using System;
+using System.Collections.Generic;
 
 namespace NUnit.Framework.Internal
 {
@@ -143,6 +144,28 @@ namespace NUnit.Framework.Internal
             var notGeneric = new Dummy(1).GetType().ToString();
 
             Assert.Throws<ArgumentException>(() => _differenceGetter.GetTopLevelGenericType(notGeneric));
+        }
+
+        [Test]
+        public void TestGetFullyQualifiedGenericParametersOfObjectSingleGenericParam()
+        {
+            var generic = new DummyTemplatedClass<Dummy>(new Dummy(1));
+
+            var expected = new List<string>() { "NUnit.Framework.Internal.TypeNameDifferenceTests+Dummy" };
+            var actual = _differenceGetter.GetFullyQualifiedGenericParameters(generic);
+
+            CollectionAssert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void TestGetFullyQualifiedGenericParametersOfObjectDoubleGenericParam()
+        {
+            var generic = new KeyValuePair<string, int>();
+
+            var expected = new List<string>() { "System.String", "System.Int32"};
+            var actual = _differenceGetter.GetFullyQualifiedGenericParameters(generic);
+
+            CollectionAssert.AreEquivalent(expected, actual);
         }
 
         //TODO: create test for nested generics
