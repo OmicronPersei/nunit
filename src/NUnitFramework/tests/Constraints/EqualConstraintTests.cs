@@ -696,18 +696,32 @@ namespace NUnit.Framework.Constraints
             }
         }
 
+        class DummyTemplatedClass<T>
+        {
+            private object _obj;
+            public DummyTemplatedClass(object obj)
+            {
+                _obj = obj;
+            }
+
+            public override string ToString()
+            {
+                return _obj.ToString();
+            }
+        }
+
         [Test]
-        public void SomeTest()
+        public void TestSameValueDifferentTypeUsingGenericTypes()
         {
             var d1 = new Dummy(12);
             var d2 = new Dummy1(12);
-            var kvp1 = new KeyValuePair<Dummy, string>(d1, "");
-            var kvp2 = new KeyValuePair<Dummy1, string>(d2, "");
+            var dc1 = new DummyTemplatedClass<Dummy>(d1);
+            var dc2 = new DummyTemplatedClass<Dummy1>(d2);
 
-            var ex = Assert.Throws<AssertionException>(() => Assert.AreEqual(kvp1, kvp2));
+            var ex = Assert.Throws<AssertionException>(() => Assert.AreEqual(dc1, dc2));
             var expectedMsg =
-                "  Expected: [<Dummy 12>, <string.Empty>] (EqualConstraintTests+Dummy,System.String])" + Environment.NewLine +
-                "  But was:  [<Dummy 12>, <string.Empty>] (EqualConstraintTests+Dummy1,System.String])" + Environment.NewLine;
+                "  Expected: <Dummy 12> (EqualConstraintTests+Dummy])" + Environment.NewLine +
+                "  But was:  <Dummy 12> (EqualConstraintTests+Dummy1])" + Environment.NewLine;
 
             Assert.AreEqual(expectedMsg, ex.Message);
         }
