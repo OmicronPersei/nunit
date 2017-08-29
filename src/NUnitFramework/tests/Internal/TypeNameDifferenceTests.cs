@@ -26,6 +26,47 @@ using System.Collections.Generic;
 
 namespace NUnit.Framework.Internal
 {
+    namespace DifferingNamespace1
+    {
+        class Dummy
+        {
+            internal readonly int value;
+
+            public Dummy(int value)
+            {
+                this.value = value;
+            }
+
+            public override string ToString()
+            {
+                return "Dummy " + value;
+            }
+        }
+    }
+
+    namespace DifferingNamespace2
+    {
+        class Dummy
+        {
+            internal readonly int value;
+
+            public Dummy(int value)
+            {
+                this.value = value;
+            }
+
+            public override string ToString()
+            {
+                return "Dummy " + value;
+            }
+        }
+    }
+
+    public class TypeNameDifferenceTestBase
+    {
+
+    }
+
     public class TypeNameDifferenceTests
     {
         #region Mock types
@@ -84,61 +125,65 @@ namespace NUnit.Framework.Internal
             _differenceGetter = new TypeNameDifference();
         }
 
+        private void TestShortenedNameDifference(object objA, object objB, string expectedA, string expectedB)
+        {
+            string actualA, actualB;
+
+            _differenceGetter.ResolveTypeNameDifference(
+                 objA, objB, out actualA, out actualB);
+
+            Assert.That(actualA, Is.EqualTo(expectedA));
+            Assert.That(actualB, Is.EqualTo(expectedB));
+        }
+
         [Test]
         public void TestResolveTypeNameDifferenceNonGenericDifferingTypes()
         {
-            var actual = new Dummy(1);
-            var expected = new Dummy1(1);
-
-            string actualStr, expectedStr;
-
-            //_differenceGetter.ShortenTypeNames(
-            //     expected, actual, out expectedStr, out actualStr);
-
-            //Assert.That(expectedStr, Is.EqualTo("TypeNameDifferenceTests+Dummy1"));
-            //Assert.That(actualStr, Is.EqualTo("TypeNameDifferenceTests+Dummy"));
-
-            _differenceGetter.ResolveTypeNameDifference(
-                 expected, actual, out expectedStr, out actualStr);
-
-            Assert.That(expectedStr, Is.EqualTo("TypeNameDifferenceTests+Dummy1"));
-            Assert.That(actualStr, Is.EqualTo("TypeNameDifferenceTests+Dummy"));
+            TestShortenedNameDifference(
+                new Dummy(1),
+                new Dummy1(1),
+                "TypeNameDifferenceTests+Dummy",
+                "TypeNameDifferenceTests+Dummy1");
         }
 
         [Test]
         public void TestResolveTypeNameDifferenceNonGenericNonDifferingTypes()
         {
-            var actual = new Dummy(1);
-            var expected = new Dummy(1);
+            TestShortenedNameDifference(
+                new Dummy(1),
+                new Dummy(1),
+                "TypeNameDifferenceTests+Dummy",
+                "TypeNameDifferenceTests+Dummy");
+        }
 
-            string actualStr, expectedStr;
+        [Test]
+        public void TestResolveTypeNameDifferenceNonGenericNonDifferingTypesSingularDiffNamespace()
+        {
+            TestShortenedNameDifference(
+                new DifferingNamespace1.Dummy(1),
+                new Dummy(1),
+                "Dummy",
+                "TypeNameDifferenceTests+Dummy");
+        }
 
-            //_differenceGetter.ShortenTypeNames(
-            //     expected, actual, out expectedStr, out actualStr);
-
-            //Assert.That(expectedStr, Is.EqualTo("TypeNameDifferenceTests+Dummy"));
-            //Assert.That(actualStr, Is.EqualTo("TypeNameDifferenceTests+Dummy"));
-
-            _differenceGetter.ResolveTypeNameDifference(
-                 expected, actual, out expectedStr, out actualStr);
-
-            Assert.That(expectedStr, Is.EqualTo("TypeNameDifferenceTests+Dummy"));
-            Assert.That(actualStr, Is.EqualTo("TypeNameDifferenceTests+Dummy"));
+        [Test]
+        public void TestResolveTypeNameDifferenceNonGenericNonDifferingTypesBothDiffNamespace()
+        {
+            TestShortenedNameDifference(
+                new DifferingNamespace1.Dummy(1),
+                new DifferingNamespace2.Dummy(1),
+                "DifferingNamespace1.Dummy",
+                "DifferingNamespace2.Dummy");
         }
 
         [Test]
         public void TestResolveTypeNameDifferenceGeneric()
         {
-            var expected = new DummyTemplatedClass<Dummy1>(new Dummy(1));
-            var actual = new DummyTemplatedClass<Dummy>(new Dummy(1));
-
-            string actualStr, expectedStr;
-
-            _differenceGetter.ResolveTypeNameDifference(
-                expected, actual, out expectedStr, out actualStr);
-
-            Assert.That(expectedStr, Is.EqualTo("TypeNameDifferenceTests+DummyTemplatedClass`1[TypeNameDifferenceTests+Dummy1]"));
-            Assert.That(actualStr, Is.EqualTo("TypeNameDifferenceTests+DummyTemplatedClass`1[TypeNameDifferenceTests+Dummy]"));
+            TestShortenedNameDifference(
+                new DummyTemplatedClass<Dummy1>(new Dummy(1)),
+                new DummyTemplatedClass<Dummy>(new Dummy(1)),
+                "TypeNameDifferenceTests+DummyTemplatedClass`1[TypeNameDifferenceTests+Dummy1]",
+                "TypeNameDifferenceTests+DummyTemplatedClass`1[TypeNameDifferenceTests+Dummy]");
         }
 
         [Test]
