@@ -187,6 +187,22 @@ namespace NUnit.Framework.Internal
         }
 
         [Test]
+        public void TestResolveTypeNameDifferenceGenericDifferentAmountGenericParams()
+        {
+            TestShortenedNameDifference(
+                new DummyTemplatedClass<Dummy>(new Dummy(1)),
+                new KeyValuePair<int, string>(1, ""),
+                "TypeNameDifferenceTests+DummyTemplatedClass`1[TypeNameDifferenceTests+Dummy]",
+                "KeyValuePair`2[Int32,String]");
+
+            TestShortenedNameDifference(
+                new KeyValuePair<int, string>(1, ""),
+                new DummyTemplatedClass<Dummy>(new Dummy(1)),
+                "KeyValuePair`2[Int32,String]",
+                "TypeNameDifferenceTests+DummyTemplatedClass`1[TypeNameDifferenceTests+Dummy]");
+        }
+
+        [Test]
         public void TestIsObjectInstanceGeneric()
         {
             var notGeneric = new Dummy(1);

@@ -62,22 +62,34 @@ namespace NUnit.Framework.Internal
                 List<string> shortenedParamsExpected = new List<string>();
                 List<string> shortenedParamsActual = new List<string>();
 
-                for (int i = 0; i < templateParamsExpected.Count; ++i)
+                while ((templateParamsExpected.Count > 0) && (templateParamsActual.Count > 0))
                 {
                     string shortenedExpected, shortenedActual;
-                    ShortenTypeNames(templateParamsExpected[i], templateParamsActual[i], out shortenedExpected, out shortenedActual);
+                    ShortenTypeNames(templateParamsExpected[0], templateParamsActual[0], out shortenedExpected, out shortenedActual);
 
                     shortenedParamsExpected.Add(shortenedExpected);
                     shortenedParamsActual.Add(shortenedActual);
+
+                    templateParamsExpected.RemoveAt(0);
+                    templateParamsActual.RemoveAt(0);
                 }
 
-                string reconstructedShortenedExpected = ReconstructShortenedGenericTypeName(
-                    shortenedTopLevelGenericExpected, shortenedParamsExpected);
-                string reconstructedShortenedActual = ReconstructShortenedGenericTypeName(
-                    shortenedTopLevelGenericActual, shortenedParamsActual);
+                foreach(string genericParamRemaining in templateParamsExpected)
+                {
+                    string[] genericParamTokens = genericParamRemaining.Split('.');
+                    shortenedParamsExpected.Add(genericParamTokens[genericParamTokens.Length - 1]);
+                }
 
-                expectedType = reconstructedShortenedExpected;
-                actualType = reconstructedShortenedActual;
+                foreach (string genericParamRemaining in templateParamsActual)
+                {
+                    string[] genericParamTokens = genericParamRemaining.Split('.');
+                    shortenedParamsActual.Add(genericParamTokens[genericParamTokens.Length - 1]);
+                }
+
+                expectedType = ReconstructShortenedGenericTypeName(
+                    shortenedTopLevelGenericExpected, shortenedParamsExpected);
+                actualType = ReconstructShortenedGenericTypeName(
+                    shortenedTopLevelGenericActual, shortenedParamsActual);
             }
             else
             {
