@@ -203,6 +203,22 @@ namespace NUnit.Framework.Internal
         }
 
         [Test]
+        public void TestResolveNameDifferenceOneIsGenericOtherIsNot()
+        {
+            TestShortenedNameDifference(
+                new DummyTemplatedClass<Dummy>(new Dummy(1)),
+                new Dummy(1),
+                "TypeNameDifferenceTests+DummyTemplatedClass`1[TypeNameDifferenceTests+Dummy]",
+                "TypeNameDifferenceTests+Dummy");
+
+            TestShortenedNameDifference(
+                new Dummy(1),
+                new DummyTemplatedClass<Dummy>(new Dummy(1)),
+                "TypeNameDifferenceTests+Dummy",
+                "TypeNameDifferenceTests+DummyTemplatedClass`1[TypeNameDifferenceTests+Dummy]");
+        }
+
+        [Test]
         public void TestIsObjectInstanceGeneric()
         {
             var notGeneric = new Dummy(1);
@@ -266,6 +282,23 @@ namespace NUnit.Framework.Internal
                 new List<string>() { "String", "Int32" });
 
             Assert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void TestShortenTypeNamesDifferingNamespace()
+        {
+            var fullyQualifiedA = "DifferingNamespaceA.Class";
+            var fullyQualifiedB = "DifferingNamespaceB.Class";
+
+            var expectedA = "DifferingNamespaceA.Class";
+            var expectedB = "DifferingNamespaceB.Class";
+
+            string shortenedA, shortenedB;
+
+            _differenceGetter.ShortenTypeNames(fullyQualifiedA, fullyQualifiedB, out shortenedA, out shortenedB);
+
+            Assert.AreEqual(expectedA, shortenedA);
+            Assert.AreEqual(expectedB, shortenedB);
         }
 
         //TODO: create tests for mismatching amount of templated params.

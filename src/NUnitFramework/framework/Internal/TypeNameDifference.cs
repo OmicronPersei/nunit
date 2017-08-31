@@ -91,6 +91,10 @@ namespace NUnit.Framework.Internal
                 actualType = ReconstructShortenedGenericTypeName(
                     shortenedTopLevelGenericActual, shortenedParamsActual);
             }
+            else if (IsObjectTypeGeneric(expected) || IsObjectTypeGeneric(actual))
+            {
+                //do something... x.x
+            }
             else
             {
                 ShortenTypeNames(expected.GetType().ToString(), actual.GetType().ToString(), out expectedType, out actualType);
