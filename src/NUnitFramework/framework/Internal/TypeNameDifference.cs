@@ -56,8 +56,8 @@ namespace NUnit.Framework.Internal
                     out shortenedTopLevelGenericExpected,
                     out shortenedTopLevelGenericActual);
 
-                List<string> templateParamsExpected = GetFullyQualifiedGenericParameters(expected);
-                List<string> templateParamsActual = GetFullyQualifiedGenericParameters(actual);
+                List<string> templateParamsExpected = GetFullyQualifiedGenericParameters(expectedFullType);
+                List<string> templateParamsActual = GetFullyQualifiedGenericParameters(actualFullType);
 
                 List<string> shortenedParamsExpected = new List<string>();
                 List<string> shortenedParamsActual = new List<string>();
@@ -76,14 +76,12 @@ namespace NUnit.Framework.Internal
 
                 foreach(string genericParamRemaining in templateParamsExpected)
                 {
-                    string[] genericParamTokens = genericParamRemaining.Split('.');
-                    shortenedParamsExpected.Add(genericParamTokens[genericParamTokens.Length - 1]);
+                    shortenedParamsExpected.Add(GetOnlyTypeName(genericParamRemaining));
                 }
 
                 foreach (string genericParamRemaining in templateParamsActual)
                 {
-                    string[] genericParamTokens = genericParamRemaining.Split('.');
-                    shortenedParamsActual.Add(genericParamTokens[genericParamTokens.Length - 1]);
+                    shortenedParamsActual.Add(GetOnlyTypeName(genericParamRemaining));
                 }
 
                 expectedType = ReconstructShortenedGenericTypeName(
@@ -93,7 +91,16 @@ namespace NUnit.Framework.Internal
             }
             else if (IsObjectTypeGeneric(expected) || IsObjectTypeGeneric(actual))
             {
-                //do something... x.x
+                if (IsObjectTypeGeneric(expected))
+                {
+                    expectedType = ShortenFullyQualifiedGenericType(expectedFullType);
+                    actualType = GetOnlyTypeName(actualFullType);
+                }
+                else
+                {
+                    expectedType = GetOnlyTypeName(expectedFullType);
+                    actualType = ShortenFullyQualifiedGenericType(actualFullType);
+                }
             }
             else
             {
@@ -160,12 +167,11 @@ namespace NUnit.Framework.Internal
         /// <summary>
         /// Get the fully qualified name of the generic parameters of a given object.
         /// </summary>
-        /// <param name="obj">The <see cref="object"/> to get the generic parameters of.</param>
-        public List<string> GetFullyQualifiedGenericParameters(object obj)
+        /// <param name="FullyQualifiedObjectType">The fully qualified name of the generic type.</param>
+        public List<string> GetFullyQualifiedGenericParameters(string FullyQualifiedObjectType)
         {
-            var name = obj.GetType().ToString();
             var regex = new Regex(@"\[(.+)\]");
-            var match = regex.Match(name);
+            var match = regex.Match(FullyQualifiedObjectType);
             return new List<string>(match.Groups[1].Value.Split(','));
         }
 
@@ -194,6 +200,38 @@ namespace NUnit.Framework.Internal
         public string ReconstructShortenedGenericTypeName(string GenericType, List<string> TemplateParams)
         {
             return GenericType + "[" + string.Join(",", TemplateParams.ToArray()) + "]";
+        }
+
+        /// <summary>
+        /// Obtain the name of the type, given a fully qualified name.
+        /// </summary>
+        /// <param name="FullyQualifiedName">The fully qualified name to resolve the type of.</param>
+        public string GetOnlyTypeName(string FullyQualifiedName)
+        {
+            if (FullyQualifiedName.Contains("."))
+            {
+                string[] split = FullyQualifiedName.Split('.');
+                return split[split.Length - 1];
+            }
+            else
+            {
+                return FullyQualifiedName;
+            }
+        }
+
+        /// <summary>
+        /// Shorten a fully qualified generic type name to only the names of the 
+        /// </summary>
+        /// <param name="FullyQualifiedGenericType">The fully qualified name of a generic type.</param>
+        public string ShortenFullyQualifiedGenericType(string FullyQualifiedGenericType)
+        {
+            string genericType = GetOnlyTypeName(GetTopLevelGenericType(FullyQualifiedGenericType));
+
+            List<string> genericParams = GetFullyQualifiedGenericParameters(FullyQualifiedGenericType);
+            List<string> shortenedGenericParams = new List<string>();
+            genericParams.ForEach(x => shortenedGenericParams.Add(GetOnlyTypeName(x)));
+
+            return ReconstructShortenedGenericTypeName(genericType, shortenedGenericParams);
         }
     }
 }

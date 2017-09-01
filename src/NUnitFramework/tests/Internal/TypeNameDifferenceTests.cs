@@ -216,6 +216,12 @@ namespace NUnit.Framework.Internal
                 new DummyTemplatedClass<Dummy>(new Dummy(1)),
                 "TypeNameDifferenceTests+Dummy",
                 "TypeNameDifferenceTests+DummyTemplatedClass`1[TypeNameDifferenceTests+Dummy]");
+
+            TestShortenedNameDifference(
+                new KeyValuePair<string, int>("str", 0),
+                new Dummy(1),
+                "KeyValuePair`2[String,Int32]",
+                "TypeNameDifferenceTests+Dummy");
         }
 
         [Test]
@@ -256,7 +262,7 @@ namespace NUnit.Framework.Internal
             var generic = new DummyTemplatedClass<Dummy>(new Dummy(1));
 
             var expected = new List<string>() { "NUnit.Framework.Internal.TypeNameDifferenceTests+Dummy" };
-            var actual = _differenceGetter.GetFullyQualifiedGenericParameters(generic);
+            var actual = _differenceGetter.GetFullyQualifiedGenericParameters(generic.GetType().ToString());
 
             CollectionAssert.AreEqual(expected, actual);
         }
@@ -267,7 +273,7 @@ namespace NUnit.Framework.Internal
             var generic = new KeyValuePair<string, int>();
 
             var expected = new List<string>() { "System.String", "System.Int32"};
-            var actual = _differenceGetter.GetFullyQualifiedGenericParameters(generic);
+            var actual = _differenceGetter.GetFullyQualifiedGenericParameters(generic.GetType().ToString());
 
             CollectionAssert.AreEquivalent(expected, actual);
         }
@@ -299,6 +305,25 @@ namespace NUnit.Framework.Internal
 
             Assert.AreEqual(expectedA, shortenedA);
             Assert.AreEqual(expectedB, shortenedB);
+        }
+
+        [Test]
+        [TestCase("NamespaceA.Type", "Type")]
+        [TestCase("Type", "Type")]
+        public void TestGetOnlyTypeName(string input, string expectedOutput)
+        {
+            string actual = _differenceGetter.GetOnlyTypeName(input);
+
+            Assert.AreEqual(expectedOutput, actual);
+        }
+
+        [Test]
+        [TestCase("A.GenericType`1[B.Type]", "GenericType`1[Type]")]
+        public void TestShortenFullyQualifiedGenericType(string FullyQualifiedGenericType, string expectedOutput)
+        {
+            string actual = _differenceGetter.ShortenFullyQualifiedGenericType(FullyQualifiedGenericType);
+
+            Assert.AreEqual(expectedOutput, actual);
         }
 
         //TODO: create tests for mismatching amount of templated params.
