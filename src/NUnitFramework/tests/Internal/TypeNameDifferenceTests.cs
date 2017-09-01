@@ -187,6 +187,28 @@ namespace NUnit.Framework.Internal
         }
 
         [Test]
+        public void TestResolveTypeNameDifferenceGenericDifferingNamespaces()
+        {
+            TestShortenedNameDifference(
+                new DummyTemplatedClass<Dummy>(new Dummy(1)),
+                new DummyTemplatedClass<DifferingNamespace1.Dummy>(new DifferingNamespace1.Dummy(1)),
+                "TypeNameDifferenceTests+DummyTemplatedClass`1[TypeNameDifferenceTests+Dummy]",
+                "TypeNameDifferenceTests+DummyTemplatedClass`1[Dummy]");
+
+            TestShortenedNameDifference(
+                new DummyTemplatedClass<DifferingNamespace1.Dummy>(new DifferingNamespace1.Dummy(1)),
+                new DummyTemplatedClass<Dummy>(new Dummy(1)),
+                "TypeNameDifferenceTests+DummyTemplatedClass`1[Dummy]",
+                "TypeNameDifferenceTests+DummyTemplatedClass`1[TypeNameDifferenceTests+Dummy]");
+
+            TestShortenedNameDifference(
+                new DummyTemplatedClass<DifferingNamespace1.Dummy>(new DifferingNamespace1.Dummy(1)),
+                new DummyTemplatedClass<DifferingNamespace2.Dummy>(new DifferingNamespace2.Dummy(1)),
+                "TypeNameDifferenceTests+DummyTemplatedClass`1[DifferingNamespace1.Dummy]",
+                "TypeNameDifferenceTests+DummyTemplatedClass`1[DifferingNamespace2.Dummy]");
+        }
+
+        [Test]
         public void TestResolveTypeNameDifferenceGenericDifferentAmountGenericParams()
         {
             TestShortenedNameDifference(
@@ -222,6 +244,12 @@ namespace NUnit.Framework.Internal
                 new Dummy(1),
                 "KeyValuePair`2[String,Int32]",
                 "TypeNameDifferenceTests+Dummy");
+
+            TestShortenedNameDifference(
+                new Dummy(1),
+                new KeyValuePair<string, int>("str", 0),
+                "TypeNameDifferenceTests+Dummy",
+                "KeyValuePair`2[String,Int32]");
         }
 
         [Test]
@@ -308,6 +336,7 @@ namespace NUnit.Framework.Internal
         }
 
         [Test]
+        [TestCase("NamespaceA.NamespaceB.Type", "Type")]
         [TestCase("NamespaceA.Type", "Type")]
         [TestCase("Type", "Type")]
         public void TestGetOnlyTypeName(string input, string expectedOutput)
@@ -319,14 +348,13 @@ namespace NUnit.Framework.Internal
 
         [Test]
         [TestCase("A.GenericType`1[B.Type]", "GenericType`1[Type]")]
+        [TestCase("A.GenericType`2[B.TypeA,C.D.E.TypeB]", "GenericType`2[TypeA,TypeB]")]
         public void TestShortenFullyQualifiedGenericType(string FullyQualifiedGenericType, string expectedOutput)
         {
             string actual = _differenceGetter.ShortenFullyQualifiedGenericType(FullyQualifiedGenericType);
 
             Assert.AreEqual(expectedOutput, actual);
         }
-
-        //TODO: create tests for mismatching amount of templated params.
 
         //TODO: create test for nested generics
     }
