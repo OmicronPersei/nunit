@@ -46,48 +46,14 @@ namespace NUnit.Framework.Internal
 
             if (IsObjectTypeGeneric(expected) && IsObjectTypeGeneric(actual))
             {
-                string toplevelGenericExpected = GetTopLevelGenericType(expectedFullType);
-                string toplevelGenericActual = GetTopLevelGenericType(actualFullType);
-
                 string shortenedTopLevelGenericExpected, shortenedTopLevelGenericActual;
-                ShortenTypeNames(
-                    toplevelGenericExpected,
-                    toplevelGenericActual,
-                    out shortenedTopLevelGenericExpected,
-                    out shortenedTopLevelGenericActual);
+                GetShortenedTopLevelGenericTypes(expectedFullType, actualFullType, out shortenedTopLevelGenericExpected, out shortenedTopLevelGenericActual);
 
-                List<string> templateParamsExpected = GetFullyQualifiedGenericParameters(expectedFullType);
-                List<string> templateParamsActual = GetFullyQualifiedGenericParameters(actualFullType);
+                List<string> shortenedParamsExpected, shortenedParamsActual;
+                GetShortenedGenericParams(expectedFullType, actualFullType, out shortenedParamsExpected, out shortenedParamsActual);
 
-                List<string> shortenedParamsExpected = new List<string>();
-                List<string> shortenedParamsActual = new List<string>();
-
-                while ((templateParamsExpected.Count > 0) && (templateParamsActual.Count > 0))
-                {
-                    string shortenedExpected, shortenedActual;
-                    ShortenTypeNames(templateParamsExpected[0], templateParamsActual[0], out shortenedExpected, out shortenedActual);
-
-                    shortenedParamsExpected.Add(shortenedExpected);
-                    shortenedParamsActual.Add(shortenedActual);
-
-                    templateParamsExpected.RemoveAt(0);
-                    templateParamsActual.RemoveAt(0);
-                }
-
-                foreach(string genericParamRemaining in templateParamsExpected)
-                {
-                    shortenedParamsExpected.Add(GetOnlyTypeName(genericParamRemaining));
-                }
-
-                foreach (string genericParamRemaining in templateParamsActual)
-                {
-                    shortenedParamsActual.Add(GetOnlyTypeName(genericParamRemaining));
-                }
-
-                expectedType = ReconstructShortenedGenericTypeName(
-                    shortenedTopLevelGenericExpected, shortenedParamsExpected);
-                actualType = ReconstructShortenedGenericTypeName(
-                    shortenedTopLevelGenericActual, shortenedParamsActual);
+                expectedType = ReconstructShortenedGenericTypeName(shortenedTopLevelGenericExpected, shortenedParamsExpected);
+                actualType = ReconstructShortenedGenericTypeName(shortenedTopLevelGenericActual, shortenedParamsActual);
             }
             else if (IsObjectTypeGeneric(expected) || IsObjectTypeGeneric(actual))
             {
@@ -104,10 +70,49 @@ namespace NUnit.Framework.Internal
             }
             else
             {
-                ShortenTypeNames(expected.GetType().ToString(), actual.GetType().ToString(), out expectedType, out actualType);
+                ShortenTypeNames(expectedFullType, actualFullType, out expectedType, out actualType);
+            }
+        }
+
+        private void GetShortenedGenericParams(string expectedFullType, string actualFullType, out List<string> shortenedParamsExpected, out List<string> shortenedParamsActual)
+        {
+            List<string> templateParamsExpected = GetFullyQualifiedGenericParameters(expectedFullType);
+            List<string> templateParamsActual = GetFullyQualifiedGenericParameters(actualFullType);
+
+            shortenedParamsExpected = new List<string>();
+            shortenedParamsActual = new List<string>();
+            while ((templateParamsExpected.Count > 0) && (templateParamsActual.Count > 0))
+            {
+                string shortenedExpected, shortenedActual;
+                ShortenTypeNames(templateParamsExpected[0], templateParamsActual[0], out shortenedExpected, out shortenedActual);
+
+                shortenedParamsExpected.Add(shortenedExpected);
+                shortenedParamsActual.Add(shortenedActual);
+
+                templateParamsExpected.RemoveAt(0);
+                templateParamsActual.RemoveAt(0);
             }
 
+            foreach (string genericParamRemaining in templateParamsExpected)
+            {
+                shortenedParamsExpected.Add(GetOnlyTypeName(genericParamRemaining));
+            }
 
+            foreach (string genericParamRemaining in templateParamsActual)
+            {
+                shortenedParamsActual.Add(GetOnlyTypeName(genericParamRemaining));
+            }
+        }
+
+        private void GetShortenedTopLevelGenericTypes(string expectedFullType, string actualFullType, out string shortenedTopLevelGenericExpected, out string shortenedTopLevelGenericActual)
+        {
+            string toplevelGenericExpected = GetTopLevelGenericType(expectedFullType);
+            string toplevelGenericActual = GetTopLevelGenericType(actualFullType);
+            ShortenTypeNames(
+                toplevelGenericExpected,
+                toplevelGenericActual,
+                out shortenedTopLevelGenericExpected,
+                out shortenedTopLevelGenericActual);
         }
 
         /// <summary>
