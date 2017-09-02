@@ -42,6 +42,12 @@ namespace NUnit.Framework.Internal
                 return "Dummy " + value;
             }
         }
+
+        class DummyGeneric<T>
+        {
+            public DummyGeneric(T obj)
+            { }
+        }
     }
 
     namespace DifferingNamespace2
@@ -250,6 +256,28 @@ namespace NUnit.Framework.Internal
                 new KeyValuePair<string, int>("str", 0),
                 "TypeNameDifferenceTests+Dummy",
                 "KeyValuePair`2[String,Int32]");
+        }
+
+        [Test]
+        public void TestNestedGenericsNonDifferingNamespace()
+        {
+            TestShortenedNameDifference(
+                new DifferingNamespace1.DummyGeneric<List<string>>(new List<string>()),
+                new DifferingNamespace1.DummyGeneric<IEnumerable<string>>(new List<string>()),
+                "DummyGeneric`1[List`1[String]]",
+                "DummyGeneric`1[IEnumerable`1[String]]");
+
+            TestShortenedNameDifference(
+                new DifferingNamespace1.DummyGeneric<IEnumerable<string>>(new List<string>()),
+                new DifferingNamespace1.DummyGeneric<List<string>>(new List<string>()),
+                "DummyGeneric`1[IEnumerable`1[String]]",
+                "DummyGeneric`1[List`1[String]]");
+
+            TestShortenedNameDifference(
+                new DifferingNamespace1.DummyGeneric<KeyValuePair<DifferingNamespace1.Dummy, DifferingNamespace2.Dummy>>(new KeyValuePair<DifferingNamespace1.Dummy, DifferingNamespace2.Dummy>()),
+                new DifferingNamespace1.DummyGeneric<KeyValuePair<DifferingNamespace2.Dummy, DifferingNamespace1.Dummy>>(new KeyValuePair<DifferingNamespace2.Dummy, DifferingNamespace1.Dummy>()),
+                "DummyGeneric`1[KeyValuePair`2[DifferingNamespace1.Dummy,DifferingNamespace2.Dummy]]",
+                "DummyGeneric`1[KeyValuePair`2[DifferingNamespace2.Dummy,DifferingNamespace1.Dummy]]");
         }
 
         [Test]
