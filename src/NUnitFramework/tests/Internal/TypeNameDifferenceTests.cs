@@ -250,8 +250,6 @@ namespace NUnit.Framework.Internal
                 new KeyValuePair<string, int>("str", 0),
                 "TypeNameDifferenceTests+Dummy",
                 "KeyValuePair`2[String,Int32]");
-
-            var blah = new DummyTemplatedClass<DummyTemplatedClass<Dummy>>(new Dummy(1));
         }
 
         [Test]

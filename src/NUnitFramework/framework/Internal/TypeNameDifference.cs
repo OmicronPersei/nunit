@@ -96,7 +96,8 @@ namespace NUnit.Framework.Internal
             while ((templateParamsExpected.Count > 0) && (templateParamsActual.Count > 0))
             {
                 string shortenedExpected, shortenedActual;
-                ShortenTypeNames(templateParamsExpected[0], templateParamsActual[0], out shortenedExpected, out shortenedActual);
+                ResolveTypeNameDifference(templateParamsExpected[0], templateParamsActual[0], out shortenedExpected, out shortenedActual);
+                //ShortenTypeNames
 
                 shortenedParamsExpected.Add(shortenedExpected);
                 shortenedParamsActual.Add(shortenedActual);
