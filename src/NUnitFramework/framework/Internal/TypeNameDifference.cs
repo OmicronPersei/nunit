@@ -44,33 +44,45 @@ namespace NUnit.Framework.Internal
             string expectedFullType = expected.GetType().ToString();
             string actualFullType = actual.GetType().ToString();
 
+            ResolveTypeNameDifference(expectedFullType, actualFullType, out expectedType, out actualType);
+        }
+
+        /// <summary>
+        /// Gets the unique type name between expected and actual.
+        /// </summary>
+        /// <param name="expected"></param>
+        /// <param name="actual"></param>
+        /// <param name="expectedShortened"></param>
+        /// <param name="actualShortened"></param>
+        public void ResolveTypeNameDifference(string expected, string actual, out string expectedShortened, out string actualShortened)
+        {
             if (IsObjectTypeGeneric(expected) && IsObjectTypeGeneric(actual))
             {
                 string shortenedTopLevelGenericExpected, shortenedTopLevelGenericActual;
-                GetShortenedTopLevelGenericTypes(expectedFullType, actualFullType, out shortenedTopLevelGenericExpected, out shortenedTopLevelGenericActual);
+                GetShortenedTopLevelGenericTypes(expected, actual, out shortenedTopLevelGenericExpected, out shortenedTopLevelGenericActual);
 
                 List<string> shortenedParamsExpected, shortenedParamsActual;
-                GetShortenedGenericParams(expectedFullType, actualFullType, out shortenedParamsExpected, out shortenedParamsActual);
+                GetShortenedGenericParams(expected, actual, out shortenedParamsExpected, out shortenedParamsActual);
 
-                expectedType = ReconstructShortenedGenericTypeName(shortenedTopLevelGenericExpected, shortenedParamsExpected);
-                actualType = ReconstructShortenedGenericTypeName(shortenedTopLevelGenericActual, shortenedParamsActual);
+                expectedShortened = ReconstructShortenedGenericTypeName(shortenedTopLevelGenericExpected, shortenedParamsExpected);
+                actualShortened = ReconstructShortenedGenericTypeName(shortenedTopLevelGenericActual, shortenedParamsActual);
             }
             else if (IsObjectTypeGeneric(expected) || IsObjectTypeGeneric(actual))
             {
                 if (IsObjectTypeGeneric(expected))
                 {
-                    expectedType = ShortenFullyQualifiedGenericType(expectedFullType);
-                    actualType = GetOnlyTypeName(actualFullType);
+                    expectedShortened = ShortenFullyQualifiedGenericType(expected);
+                    actualShortened = GetOnlyTypeName(actual);
                 }
                 else
                 {
-                    expectedType = GetOnlyTypeName(expectedFullType);
-                    actualType = ShortenFullyQualifiedGenericType(actualFullType);
+                    expectedShortened = GetOnlyTypeName(expected);
+                    actualShortened = ShortenFullyQualifiedGenericType(actual);
                 }
             }
             else
             {
-                ShortenTypeNames(expectedFullType, actualFullType, out expectedType, out actualType);
+                ShortenTypeNames(expected, actual, out expectedShortened, out actualShortened);
             }
         }
 
@@ -158,15 +170,10 @@ namespace NUnit.Framework.Internal
         /// <summary>
         /// Returns whether or not the object is a generic type.
         /// </summary>
-        /// <param name="obj">The <see cref="object"/> to check if is generic.</param>
-        /// <remarks>Used for cross-compatability between .NET and .NETCore.</remarks>
-        public bool IsObjectTypeGeneric(object obj)
+        /// <param name="ObjectTypeName">The fully qualified type name to check if is generic.</param>
+        public bool IsObjectTypeGeneric(string ObjectTypeName)
         {
-#if NETSTANDARD1_3 || NETSTANDARD1_6
-            return obj.GetType().IsConstructedGenericType;
-#else
-            return obj.GetType().IsGenericType;
-#endif
+            return ObjectTypeName.Contains("`");
         }
 
         /// <summary>

@@ -250,6 +250,8 @@ namespace NUnit.Framework.Internal
                 new KeyValuePair<string, int>("str", 0),
                 "TypeNameDifferenceTests+Dummy",
                 "KeyValuePair`2[String,Int32]");
+
+            var blah = new DummyTemplatedClass<DummyTemplatedClass<Dummy>>(new Dummy(1));
         }
 
         [Test]
@@ -257,11 +259,11 @@ namespace NUnit.Framework.Internal
         {
             var notGeneric = new Dummy(1);
 
-            Assert.False(_differenceGetter.IsObjectTypeGeneric(notGeneric));
+            Assert.False(_differenceGetter.IsObjectTypeGeneric(notGeneric.GetType().ToString()));
 
             var generic = new DummyTemplatedClass<Dummy>(new Dummy(1));
 
-            Assert.That(_differenceGetter.IsObjectTypeGeneric(generic));
+            Assert.That(_differenceGetter.IsObjectTypeGeneric(generic.GetType().ToString()));
         }
 
         [Test]
