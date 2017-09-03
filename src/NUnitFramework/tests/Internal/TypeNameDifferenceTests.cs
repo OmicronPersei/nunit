@@ -68,6 +68,48 @@ namespace NUnit.Framework.Internal
         }
     }
 
+    namespace A
+    {
+        class GenA<T>
+        { }
+
+        class GenB<T>
+        { }
+
+        class GenC<T, R>
+        { }
+
+        namespace B
+        {
+            class GenX<T>
+            { }
+
+            class GenY<T>
+            { }
+        }
+    }
+
+    namespace B
+    {
+        class GenA<T>
+        { }
+
+        class GenB<T>
+        { }
+
+        class GenC<T, R>
+        { }
+
+        namespace B
+        {
+            class GenX<T>
+            { }
+
+            class GenY<T>
+            { }
+        }
+    }
+
     public class TypeNameDifferenceTestBase
     {
 
@@ -278,6 +320,36 @@ namespace NUnit.Framework.Internal
                 new DifferingNamespace1.DummyGeneric<KeyValuePair<DifferingNamespace2.Dummy, DifferingNamespace1.Dummy>>(new KeyValuePair<DifferingNamespace2.Dummy, DifferingNamespace1.Dummy>()),
                 "DummyGeneric`1[KeyValuePair`2[DifferingNamespace1.Dummy,DifferingNamespace2.Dummy]]",
                 "DummyGeneric`1[KeyValuePair`2[DifferingNamespace2.Dummy,DifferingNamespace1.Dummy]]");
+
+            TestShortenedNameDifference(
+                new DifferingNamespace1.DummyGeneric<KeyValuePair<DifferingNamespace2.Dummy, DifferingNamespace1.Dummy>>(new KeyValuePair<DifferingNamespace2.Dummy, DifferingNamespace1.Dummy>()),
+                new DifferingNamespace1.DummyGeneric<KeyValuePair<DifferingNamespace1.Dummy, DifferingNamespace2.Dummy>>(new KeyValuePair<DifferingNamespace1.Dummy, DifferingNamespace2.Dummy>()),
+                "DummyGeneric`1[KeyValuePair`2[DifferingNamespace2.Dummy,DifferingNamespace1.Dummy]]",
+                "DummyGeneric`1[KeyValuePair`2[DifferingNamespace1.Dummy,DifferingNamespace2.Dummy]]");
+
+            TestShortenedNameDifference(
+                new A.GenA<A.B.GenX<int>>(),
+                new B.GenA<A.B.GenX<short>>(),
+                "A.GenA`1[GenX`1[Int32]]",
+                "B.GenA`1[GenX`1[Int16]]");
+
+            TestShortenedNameDifference(
+                new B.GenA<A.B.GenX<short>>(), 
+                new A.GenA<A.B.GenX<int>>(),
+                "B.GenA`1[GenX`1[Int16]]",
+                "A.GenA`1[GenX`1[Int32]]");
+
+            TestShortenedNameDifference(
+                new A.GenC<int, string>(),
+                new B.GenC<int, A.GenA<string>>(),
+                "A.GenC`2[Int32,String]",
+                "B.GenC`2[Int32,GenA`1[String]]");
+
+            TestShortenedNameDifference(
+                new A.GenA<A.GenC<string, int>>(),
+                new B.GenC<A.GenA<List<int>>, B.GenC<string, int>>(),
+                "GenA`1[GenC`2[String,Int32]]",
+                "GenC`2[GenA`1[List`1[Int32]],GenC`2[String,Int32]]");
         }
 
         [Test]
@@ -334,16 +406,23 @@ namespace NUnit.Framework.Internal
             CollectionAssert.AreEqual(expected, actual);
         }
 
+        private void TestGetTopLevelFullyQualifiedGenericParams(string FullyQualifiedGenericTypeName, List<string> ExpectedOutput)
+        {
+            var actual = _differenceGetter.GetTopLevelFullyQualifiedGenericParameters(FullyQualifiedGenericTypeName);
+
+            CollectionAssert.AreEqual(ExpectedOutput, actual);
+        }
+
         [Test]
         public void TestGetFullyQualifiedGenericParametersOfObjectNestedGenerics()
         {
-            var generic = new KeyValuePair<int, KeyValuePair<int, string>>();
+            TestGetTopLevelFullyQualifiedGenericParams(
+                new KeyValuePair<int, KeyValuePair<int, string>>().GetType().ToString(),
+                new List<string>() { "System.Int32", "System.Collections.Generic.KeyValuePair`2[System.Int32,System.String]" });
 
-            var expected = new List<string>() { "System.Int32", "System.Collections.Generic.KeyValuePair`2[System.Int32,System.String]" };
-
-            var actual = _differenceGetter.GetTopLevelFullyQualifiedGenericParameters(generic.GetType().ToString());
-
-            CollectionAssert.AreEqual(expected, actual);
+            TestGetTopLevelFullyQualifiedGenericParams(
+                "GenC`2[NUnit.Framework.Internal.A.GenA`1[System.Collections.Generic.List`1[System.Int32]],NUnit.Framework.Internal.B.GenC`2[System.String,System.Int32]]",
+                new List<string>() { "NUnit.Framework.Internal.A.GenA`1[System.Collections.Generic.List`1[System.Int32]]", "NUnit.Framework.Internal.B.GenC`2[System.String,System.Int32]" });
         }
 
         [Test]

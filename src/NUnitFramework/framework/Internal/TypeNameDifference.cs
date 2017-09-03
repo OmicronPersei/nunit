@@ -183,40 +183,52 @@ namespace NUnit.Framework.Internal
         /// <param name="FullyQualifiedObjectType">The fully qualified name of the generic type.</param>
         public List<string> GetTopLevelFullyQualifiedGenericParameters(string FullyQualifiedObjectType)
         {
-            var regex = new Regex(@"\[(.+)\]");
-            var match = regex.Match(FullyQualifiedObjectType).Groups[1].Value;
 
-            List<string> split = new List<string>(match.Split(','));
+            var regexTopLevel = new Regex(@"\[(.+)\]\z");
+            var genericTopLevel = regexTopLevel.Match(FullyQualifiedObjectType).Groups[1].Value;
+
+            var matches = new Regex(@"([^,\[\]]+)(,|\Z)|([^,\[\]]+\[.+\])(,|\Z)").Matches(genericTopLevel);
             List<string> rejoinedNestedGenerics = new List<string>();
-            //Rejoin nested generic types.
-            List<string> nestedGenerics = new List<string>();
-            foreach(string token in split)
+            foreach (Match match in matches)
             {
-                if (!token.Contains("[") && !token.Contains("]"))
-                {
-                    if (nestedGenerics.Count > 0)
-                    {
-                        rejoinedNestedGenerics.Add(string.Join(",", nestedGenerics.ToArray()));
-                        nestedGenerics.Clear();
-                    }
-
-                    rejoinedNestedGenerics.Add(token);
-                }
-                else
-                {
-                    nestedGenerics.Add(token);
-                }
+                rejoinedNestedGenerics.Add(match.Value.TrimEnd(','));
             }
 
-            if (nestedGenerics.Count > 0)
-            {
-                rejoinedNestedGenerics.Add(string.Join(",", nestedGenerics.ToArray()));
-            }
+            //List<string> split = new List<string>(genericTopLevel.Split(','));
+            //List<string> rejoinedNestedGenerics = new List<string>();
+            ////Rejoin nested generic types.
+            //List<string> nestedGenerics = new List<string>();
+
+
+            //foreach (string token in split)
+            //{
+            //    if (token.Contains("[") || token.Contains("]"))
+            //    {
+            //        nestedGenerics.Add(token);
+            //    }
+            //    else
+            //    {
+                    
+            //    }
+            //}
+
+            //if (nestedGenerics.Count > 0)
+            //{
+            //    rejoinedNestedGenerics.Add(string.Join(",", nestedGenerics.ToArray()));
+            //}
 
 
 
             return rejoinedNestedGenerics;
         }
+
+        //public bool DoTokensContainFullyEncapsulatedGEneric(List<string> tokens)
+        //{
+        //    //[[,],[,]]
+
+        //    string joined = string.Join("", tokens.ToArray());
+        //    int leftBrackets = new Regex(@"\[?").Match(joined).
+        //}
 
         /// <summary>
         /// Returns the top level generic type of a given fully qualified type name.
