@@ -318,7 +318,7 @@ namespace NUnit.Framework.Internal
             var generic = new DummyTemplatedClass<Dummy>(new Dummy(1));
 
             var expected = new List<string>() { "NUnit.Framework.Internal.TypeNameDifferenceTests+Dummy" };
-            var actual = _differenceGetter.GetFullyQualifiedGenericParameters(generic.GetType().ToString());
+            var actual = _differenceGetter.GetTopLevelFullyQualifiedGenericParameters(generic.GetType().ToString());
 
             CollectionAssert.AreEqual(expected, actual);
         }
@@ -329,9 +329,21 @@ namespace NUnit.Framework.Internal
             var generic = new KeyValuePair<string, int>();
 
             var expected = new List<string>() { "System.String", "System.Int32"};
-            var actual = _differenceGetter.GetFullyQualifiedGenericParameters(generic.GetType().ToString());
+            var actual = _differenceGetter.GetTopLevelFullyQualifiedGenericParameters(generic.GetType().ToString());
 
-            CollectionAssert.AreEquivalent(expected, actual);
+            CollectionAssert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void TestGetFullyQualifiedGenericParametersOfObjectNestedGenerics()
+        {
+            var generic = new KeyValuePair<int, KeyValuePair<int, string>>();
+
+            var expected = new List<string>() { "System.Int32", "System.Collections.Generic.KeyValuePair`2[System.Int32,System.String]" };
+
+            var actual = _differenceGetter.GetTopLevelFullyQualifiedGenericParameters(generic.GetType().ToString());
+
+            CollectionAssert.AreEqual(expected, actual);
         }
 
         [Test]

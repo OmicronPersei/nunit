@@ -88,8 +88,8 @@ namespace NUnit.Framework.Internal
 
         private void GetShortenedGenericParams(string expectedFullType, string actualFullType, out List<string> shortenedParamsExpected, out List<string> shortenedParamsActual)
         {
-            List<string> templateParamsExpected = GetFullyQualifiedGenericParameters(expectedFullType);
-            List<string> templateParamsActual = GetFullyQualifiedGenericParameters(actualFullType);
+            List<string> templateParamsExpected = GetTopLevelFullyQualifiedGenericParameters(expectedFullType);
+            List<string> templateParamsActual = GetTopLevelFullyQualifiedGenericParameters(actualFullType);
 
             shortenedParamsExpected = new List<string>();
             shortenedParamsActual = new List<string>();
@@ -181,11 +181,41 @@ namespace NUnit.Framework.Internal
         /// Get the fully qualified name of the generic parameters of a given object.
         /// </summary>
         /// <param name="FullyQualifiedObjectType">The fully qualified name of the generic type.</param>
-        public List<string> GetFullyQualifiedGenericParameters(string FullyQualifiedObjectType)
+        public List<string> GetTopLevelFullyQualifiedGenericParameters(string FullyQualifiedObjectType)
         {
             var regex = new Regex(@"\[(.+)\]");
-            var match = regex.Match(FullyQualifiedObjectType);
-            return new List<string>(match.Groups[1].Value.Split(','));
+            var match = regex.Match(FullyQualifiedObjectType).Groups[1].Value;
+
+            List<string> split = new List<string>(match.Split(','));
+            List<string> rejoinedNestedGenerics = new List<string>();
+            //Rejoin nested generic types.
+            List<string> nestedGenerics = new List<string>();
+            foreach(string token in split)
+            {
+                if (!token.Contains("[") && !token.Contains("]"))
+                {
+                    if (nestedGenerics.Count > 0)
+                    {
+                        rejoinedNestedGenerics.Add(string.Join(",", nestedGenerics.ToArray()));
+                        nestedGenerics.Clear();
+                    }
+
+                    rejoinedNestedGenerics.Add(token);
+                }
+                else
+                {
+                    nestedGenerics.Add(token);
+                }
+            }
+
+            if (nestedGenerics.Count > 0)
+            {
+                rejoinedNestedGenerics.Add(string.Join(",", nestedGenerics.ToArray()));
+            }
+
+
+
+            return rejoinedNestedGenerics;
         }
 
         /// <summary>
@@ -240,7 +270,7 @@ namespace NUnit.Framework.Internal
         {
             string genericType = GetOnlyTypeName(GetTopLevelGenericType(FullyQualifiedGenericType));
 
-            List<string> genericParams = GetFullyQualifiedGenericParameters(FullyQualifiedGenericType);
+            List<string> genericParams = GetTopLevelFullyQualifiedGenericParameters(FullyQualifiedGenericType);
             List<string> shortenedGenericParams = new List<string>();
             genericParams.ForEach(x => shortenedGenericParams.Add(GetOnlyTypeName(x)));
 
