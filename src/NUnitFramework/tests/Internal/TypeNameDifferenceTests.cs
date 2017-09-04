@@ -350,6 +350,12 @@ namespace NUnit.Framework.Internal
                 new B.GenC<A.GenA<List<int>>, B.GenC<string, int>>(),
                 "GenA`1[GenC`2[String,Int32]]",
                 "GenC`2[GenA`1[List`1[Int32]],GenC`2[String,Int32]]");
+
+            TestShortenedNameDifference(
+               new B.GenC<A.GenA<List<int>>, B.GenC<string, int>>(),
+               new A.GenA<A.GenC<string, int>>(),
+               "GenC`2[GenA`1[List`1[Int32]],GenC`2[String,Int32]]",
+               "GenA`1[GenC`2[String,Int32]]");
         }
 
         [Test]
@@ -468,11 +474,21 @@ namespace NUnit.Framework.Internal
         [Test]
         [TestCase("A.GenericType`1[B.Type]", "GenericType`1[Type]")]
         [TestCase("A.GenericType`2[B.TypeA,C.D.E.TypeB]", "GenericType`2[TypeA,TypeB]")]
-        public void TestShortenFullyQualifiedGenericType(string FullyQualifiedGenericType, string expectedOutput)
+        public void TestFullyShortenTypeName(string FullyQualifiedGenericType, string expectedOutput)
         {
-            string actual = _differenceGetter.ShortenFullyQualifiedGenericType(FullyQualifiedGenericType);
+            string actual = _differenceGetter.FullyShortenTypeName(FullyQualifiedGenericType);
 
             Assert.AreEqual(expectedOutput, actual);
+        }
+
+        [Test]
+        public void TestTokensContainFullyEncapsulatedGeneric()
+        {
+            Assert.That(_differenceGetter.TokensContainFullyEncapsulatedGeneric(
+                new List<string>() { "Type`2[Blah" + "blah]" }));
+
+            Assert.IsFalse(_differenceGetter.TokensContainFullyEncapsulatedGeneric(
+                new List<string>() { "Type`2[Blah" + "blah" }));
         }
 
         //TODO: create test for nested generics

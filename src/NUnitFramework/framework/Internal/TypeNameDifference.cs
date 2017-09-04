@@ -71,13 +71,13 @@ namespace NUnit.Framework.Internal
             {
                 if (IsObjectTypeGeneric(expected))
                 {
-                    expectedShortened = ShortenFullyQualifiedGenericType(expected);
-                    actualShortened = GetOnlyTypeName(actual);
+                    expectedShortened = FullyShortenTypeName(expected);
+                    actualShortened = FullyShortenTypeName(actual);
                 }
                 else
                 {
-                    expectedShortened = GetOnlyTypeName(expected);
-                    actualShortened = ShortenFullyQualifiedGenericType(actual);
+                    expectedShortened = FullyShortenTypeName(expected);
+                    actualShortened = FullyShortenTypeName(actual);
                 }
             }
             else
@@ -108,12 +108,12 @@ namespace NUnit.Framework.Internal
 
             foreach (string genericParamRemaining in templateParamsExpected)
             {
-                shortenedParamsExpected.Add(GetOnlyTypeName(genericParamRemaining));
+                shortenedParamsExpected.Add(FullyShortenTypeName(genericParamRemaining));
             }
 
             foreach (string genericParamRemaining in templateParamsActual)
             {
-                shortenedParamsActual.Add(GetOnlyTypeName(genericParamRemaining));
+                shortenedParamsActual.Add(FullyShortenTypeName(genericParamRemaining));
             }
         }
 
@@ -187,48 +187,65 @@ namespace NUnit.Framework.Internal
             var regexTopLevel = new Regex(@"\[(.+)\]\z");
             var genericTopLevel = regexTopLevel.Match(FullyQualifiedObjectType).Groups[1].Value;
 
-            var matches = new Regex(@"([^,\[\]]+)(,|\Z)|([^,\[\]]+\[.+\])(,|\Z)").Matches(genericTopLevel);
+            //var matches = new Regex(@"([^,\[\]]+)(,|\Z)|([^,\[\]]+\[.+\])(,|\Z)").Matches(genericTopLevel);
+            //List<string> rejoinedNestedGenerics = new List<string>();
+            //foreach (Match match in matches)
+            //{
+            //    rejoinedNestedGenerics.Add(match.Value.TrimEnd(','));
+            //}
+
+            List<string> split = new List<string>(genericTopLevel.Split(','));
             List<string> rejoinedNestedGenerics = new List<string>();
-            foreach (Match match in matches)
+            //Rejoin nested generic types.
+            List<string> nestedGenerics = new List<string>();
+
+
+            foreach (string token in split)
             {
-                rejoinedNestedGenerics.Add(match.Value.TrimEnd(','));
+                if (token.Contains("[") || token.Contains("]"))
+                {
+                    nestedGenerics.Add(token);
+
+                    if (TokensContainFullyEncapsulatedGeneric(nestedGenerics))
+                    {
+                        rejoinedNestedGenerics.Add(string.Join(",", nestedGenerics.ToArray()));
+                        nestedGenerics.Clear();
+                    }
+                }
+                else
+                {
+                    rejoinedNestedGenerics.Add(token);
+                }
             }
 
-            //List<string> split = new List<string>(genericTopLevel.Split(','));
-            //List<string> rejoinedNestedGenerics = new List<string>();
-            ////Rejoin nested generic types.
-            //List<string> nestedGenerics = new List<string>();
-
-
-            //foreach (string token in split)
-            //{
-            //    if (token.Contains("[") || token.Contains("]"))
-            //    {
-            //        nestedGenerics.Add(token);
-            //    }
-            //    else
-            //    {
-                    
-            //    }
-            //}
-
-            //if (nestedGenerics.Count > 0)
-            //{
-            //    rejoinedNestedGenerics.Add(string.Join(",", nestedGenerics.ToArray()));
-            //}
-
-
+            if (nestedGenerics.Count > 0)
+            {
+                if (TokensContainFullyEncapsulatedGeneric(nestedGenerics))
+                {
+                    rejoinedNestedGenerics.Add(string.Join(",", nestedGenerics.ToArray()));
+                    nestedGenerics.Clear();
+                }
+                else
+                {
+                    throw new InvalidProgramException("This should never occur, also write a better msg here.");
+                }
+            }
 
             return rejoinedNestedGenerics;
         }
 
-        //public bool DoTokensContainFullyEncapsulatedGEneric(List<string> tokens)
-        //{
-        //    //[[,],[,]]
+        /// <summary>
+        /// Determine whether or not the expression contains the full definition of its generic parameters.
+        /// </summary>
+        public bool TokensContainFullyEncapsulatedGeneric(List<string> tokens)
+        {
+            string joined = string.Join("", tokens.ToArray());
 
-        //    string joined = string.Join("", tokens.ToArray());
-        //    int leftBrackets = new Regex(@"\[?").Match(joined).
-        //}
+            int leftBrackets = new Regex(@"\[").Matches(joined).Count;
+            int rightBrackets = new Regex(@"\]").Matches(joined).Count;
+
+            return leftBrackets == rightBrackets;
+        }
 
         /// <summary>
         /// Returns the top level generic type of a given fully qualified type name.
@@ -278,15 +295,22 @@ namespace NUnit.Framework.Internal
         /// Shorten a fully qualified generic type name to only the names of the 
         /// </summary>
         /// <param name="FullyQualifiedGenericType">The fully qualified name of a generic type.</param>
-        public string ShortenFullyQualifiedGenericType(string FullyQualifiedGenericType)
+        public string FullyShortenTypeName(string FullyQualifiedGenericType)
         {
-            string genericType = GetOnlyTypeName(GetTopLevelGenericType(FullyQualifiedGenericType));
+            if (IsObjectTypeGeneric(FullyQualifiedGenericType))
+            {
+                string genericType = GetOnlyTypeName(GetTopLevelGenericType(FullyQualifiedGenericType));
 
-            List<string> genericParams = GetTopLevelFullyQualifiedGenericParameters(FullyQualifiedGenericType);
-            List<string> shortenedGenericParams = new List<string>();
-            genericParams.ForEach(x => shortenedGenericParams.Add(GetOnlyTypeName(x)));
+                List<string> genericParams = GetTopLevelFullyQualifiedGenericParameters(FullyQualifiedGenericType);
+                List<string> shortenedGenericParams = new List<string>();
+                genericParams.ForEach(x => shortenedGenericParams.Add(FullyShortenTypeName(x)));
 
-            return ReconstructShortenedGenericTypeName(genericType, shortenedGenericParams);
+                return ReconstructShortenedGenericTypeName(genericType, shortenedGenericParams);
+            }
+            else
+            {
+                return GetOnlyTypeName(FullyQualifiedGenericType);
+            }
         }
     }
 }
