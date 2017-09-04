@@ -165,12 +165,14 @@ namespace NUnit.Framework.Internal
 
         #endregion
 
-        TypeNameDifference _differenceGetter;
+        TypeNameDifferenceResolver _differenceGetter;
+        TypeNameDifferenceUtils _differenceHelper;
 
         [SetUp]
         public void TestSetup()
         {
-            _differenceGetter = new TypeNameDifference();
+            _differenceGetter = new TypeNameDifferenceResolver();
+            _differenceHelper = new TypeNameDifferenceUtils();
         }
 
         private void TestShortenedNameDifference(object objA, object objB, string expectedA, string expectedB)
@@ -375,11 +377,11 @@ namespace NUnit.Framework.Internal
         {
             var notGeneric = new Dummy(1);
 
-            Assert.False(_differenceGetter.IsObjectTypeGeneric(notGeneric.GetType().ToString()));
+            Assert.False(_differenceHelper.IsObjectTypeGeneric(notGeneric.GetType().ToString()));
 
             var generic = new DummyTemplatedClass<Dummy>(new Dummy(1));
 
-            Assert.That(_differenceGetter.IsObjectTypeGeneric(generic.GetType().ToString()));
+            Assert.That(_differenceHelper.IsObjectTypeGeneric(generic.GetType().ToString()));
         }
 
         [Test]
@@ -389,7 +391,7 @@ namespace NUnit.Framework.Internal
 
             var expected = "NUnit.Framework.Internal.TypeNameDifferenceTests+DummyTemplatedClass`1";
 
-            var actual = _differenceGetter.GetTopLevelGenericType(generic);
+            var actual = _differenceHelper.GetTopLevelGenericType(generic);
 
             Assert.AreEqual(expected, actual);
         }
@@ -399,7 +401,7 @@ namespace NUnit.Framework.Internal
         {
             var notGeneric = new Dummy(1).GetType().ToString();
 
-            Assert.Throws<ArgumentException>(() => _differenceGetter.GetTopLevelGenericType(notGeneric));
+            Assert.Throws<ArgumentException>(() => _differenceHelper.GetTopLevelGenericType(notGeneric));
         }
 
         [Test]
@@ -408,7 +410,7 @@ namespace NUnit.Framework.Internal
             var generic = new DummyTemplatedClass<Dummy>(new Dummy(1));
 
             var expected = new List<string>() { "NUnit.Framework.Internal.TypeNameDifferenceTests+Dummy" };
-            var actual = _differenceGetter.GetTopLevelFullyQualifiedGenericParameters(generic.GetType().ToString());
+            var actual = _differenceHelper.GetTopLevelFullyQualifiedGenericParameters(generic.GetType().ToString());
 
             CollectionAssert.AreEqual(expected, actual);
         }
@@ -419,14 +421,14 @@ namespace NUnit.Framework.Internal
             var generic = new KeyValuePair<string, int>();
 
             var expected = new List<string>() { "System.String", "System.Int32"};
-            var actual = _differenceGetter.GetTopLevelFullyQualifiedGenericParameters(generic.GetType().ToString());
+            var actual = _differenceHelper.GetTopLevelFullyQualifiedGenericParameters(generic.GetType().ToString());
 
             CollectionAssert.AreEqual(expected, actual);
         }
 
         private void TestGetTopLevelFullyQualifiedGenericParams(string FullyQualifiedGenericTypeName, List<string> ExpectedOutput)
         {
-            var actual = _differenceGetter.GetTopLevelFullyQualifiedGenericParameters(FullyQualifiedGenericTypeName);
+            var actual = _differenceHelper.GetTopLevelFullyQualifiedGenericParameters(FullyQualifiedGenericTypeName);
 
             CollectionAssert.AreEqual(ExpectedOutput, actual);
         }
@@ -448,7 +450,7 @@ namespace NUnit.Framework.Internal
         {
             var expected = "KeyValuePair`2[String,Int32]";
 
-            var actual = _differenceGetter.ReconstructShortenedGenericTypeName(
+            var actual = _differenceHelper.ReconstructShortenedGenericTypeName(
                 "KeyValuePair`2",
                 new List<string>() { "String", "Int32" });
 
@@ -466,7 +468,7 @@ namespace NUnit.Framework.Internal
 
             string shortenedA, shortenedB;
 
-            _differenceGetter.ShortenTypeNames(fullyQualifiedA, fullyQualifiedB, out shortenedA, out shortenedB);
+            _differenceHelper.ShortenTypeNames(fullyQualifiedA, fullyQualifiedB, out shortenedA, out shortenedB);
 
             Assert.AreEqual(expectedA, shortenedA);
             Assert.AreEqual(expectedB, shortenedB);
@@ -478,7 +480,7 @@ namespace NUnit.Framework.Internal
         [TestCase("Type", "Type")]
         public void TestGetOnlyTypeName(string input, string expectedOutput)
         {
-            string actual = _differenceGetter.GetOnlyTypeName(input);
+            string actual = _differenceHelper.GetOnlyTypeName(input);
 
             Assert.AreEqual(expectedOutput, actual);
         }
@@ -488,7 +490,7 @@ namespace NUnit.Framework.Internal
         [TestCase("A.GenericType`2[B.TypeA,C.D.E.TypeB]", "GenericType`2[TypeA,TypeB]")]
         public void TestFullyShortenTypeName(string FullyQualifiedGenericType, string expectedOutput)
         {
-            string actual = _differenceGetter.FullyShortenTypeName(FullyQualifiedGenericType);
+            string actual = _differenceHelper.FullyShortenTypeName(FullyQualifiedGenericType);
 
             Assert.AreEqual(expectedOutput, actual);
         }
@@ -496,10 +498,10 @@ namespace NUnit.Framework.Internal
         [Test]
         public void TestTokensContainFullyEncapsulatedGeneric()
         {
-            Assert.That(_differenceGetter.TokensContainFullyEncapsulatedGeneric(
+            Assert.That(_differenceHelper.TokensContainFullyEncapsulatedGeneric(
                 new List<string>() { "Type`2[Blah" + "blah]" }));
 
-            Assert.IsFalse(_differenceGetter.TokensContainFullyEncapsulatedGeneric(
+            Assert.IsFalse(_differenceHelper.TokensContainFullyEncapsulatedGeneric(
                 new List<string>() { "Type`2[Blah" + "blah" }));
         }
 
