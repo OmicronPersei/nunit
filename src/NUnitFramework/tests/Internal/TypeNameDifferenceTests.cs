@@ -356,6 +356,18 @@ namespace NUnit.Framework.Internal
                new A.GenA<A.GenC<string, int>>(),
                "GenC`2[GenA`1[List`1[Int32]],GenC`2[String,Int32]]",
                "GenA`1[GenC`2[String,Int32]]");
+
+            TestShortenedNameDifference(
+               new B.GenC<A.GenA<List<int>>, B.GenC<string, B.GenC<string, int>>>(),
+               new A.GenA<B.GenC<string, B.GenC<string,int>>>(),
+               "GenC`2[GenA`1[List`1[Int32]],GenC`2[String,GenC`2[String,Int32]]]",
+               "GenA`1[GenC`2[String,GenC`2[String,Int32]]]");
+
+            TestShortenedNameDifference(
+               new A.GenA<B.GenC<string, B.GenC<string, int>>>(),
+               new B.GenC<A.GenA<List<int>>, B.GenC<string, B.GenC<string, int>>>(),
+               "GenA`1[GenC`2[String,GenC`2[String,Int32]]]",
+               "GenC`2[GenA`1[List`1[Int32]],GenC`2[String,GenC`2[String,Int32]]]");
         }
 
         [Test]
