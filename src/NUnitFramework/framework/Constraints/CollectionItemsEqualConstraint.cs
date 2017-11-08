@@ -153,7 +153,7 @@ namespace NUnit.Framework.Constraints
         protected bool ItemsEqual(object x, object y)
         {
             Tolerance tolerance = Tolerance.Default;
-            return _comparer.AreEqual(x, y, ref tolerance);
+            return _comparer.AreEqual(x, y, ref tolerance, true);
         }
 
         /// <summary>

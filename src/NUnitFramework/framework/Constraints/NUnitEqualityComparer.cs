@@ -153,7 +153,7 @@ namespace NUnit.Framework.Constraints
         /// <summary>
         /// Compares two objects for equality within a tolerance.
         /// </summary>
-        public bool AreEqual(object x, object y, ref Tolerance tolerance, bool topLevelComparison = true)
+        public bool AreEqual(object x, object y, ref Tolerance tolerance, bool topLevelComparison)
         {
             this.failurePoints = new List<FailurePoint>();
 

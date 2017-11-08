@@ -1,4 +1,4 @@
-﻿// ***********************************************************************
+// ***********************************************************************
 // Copyright (c) 2010 Charlie Poole, Rob Prouse
 //
 // Permission is hereby granted, free of charge, to any person obtaining
@@ -80,7 +80,7 @@ namespace NUnit.Framework.Constraints
         private bool ItemsEqual(object expected, object actual)
         {
             Tolerance tolerance = Tolerance.Default;
-            return comparer.AreEqual(expected, actual, ref tolerance);
+            return comparer.AreEqual(expected, actual, ref tolerance, true);
         }
 
         /// <summary>Try to remove an object from the tally.</summary>

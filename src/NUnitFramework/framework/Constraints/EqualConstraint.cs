@@ -389,7 +389,7 @@ namespace NUnit.Framework.Constraints
         public override ConstraintResult ApplyTo<TActual>(TActual actual)
         {
             AdjustArgumentIfNeeded(ref actual);
-            return new EqualConstraintResult(this, actual, _comparer.AreEqual(_expected, actual, ref _tolerance));
+            return new EqualConstraintResult(this, actual, _comparer.AreEqual(_expected, actual, ref _tolerance, true));
         }
 
         /// <summary>

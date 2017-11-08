@@ -41,6 +41,6 @@ namespace NUnit.Framework.Constraints.Comparers
         ///     <c>null</c> if the objects cannot be compared using the method.
         ///     Otherwise the result of the comparison is returned.
         /// </returns>
-        bool? Equal(object x, object y, ref Tolerance tolerance, bool topLevelComparison = true);
+        bool? Equal(object x, object y, ref Tolerance tolerance, bool topLevelComparison);
     }
 }

@@ -40,7 +40,7 @@ namespace NUnit.Framework.Constraints.Comparers
             _equalityComparer = equalityComparer;
         }
 
-        public bool? Equal(object x, object y, ref Tolerance tolerance, bool topLevelComparison = true)
+        public bool? Equal(object x, object y, ref Tolerance tolerance, bool topLevelComparison)
         {
             // IDictionary<,> will eventually try to compare it's key value pairs when using CollectionTally
             Type xType = x.GetType();

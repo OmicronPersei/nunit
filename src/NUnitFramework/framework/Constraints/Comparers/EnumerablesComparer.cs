@@ -38,7 +38,7 @@ namespace NUnit.Framework.Constraints.Comparers
             _equalityComparer = equalityComparer;
         }
 
-        public bool? Equal(object x, object y, ref Tolerance tolerance, bool topLevelComparison = true)
+        public bool? Equal(object x, object y, ref Tolerance tolerance, bool topLevelComparison)
         {
             if (!(x is IEnumerable) || !(y is IEnumerable))
                 return null;

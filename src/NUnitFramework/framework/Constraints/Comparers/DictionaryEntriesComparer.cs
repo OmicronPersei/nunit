@@ -37,7 +37,7 @@ namespace NUnit.Framework.Constraints.Comparers
             _equalityComparer = equalityComparer;
         }
 
-        public bool? Equal(object x, object y, ref Tolerance tolerance, bool topLevelComparison = true)
+        public bool? Equal(object x, object y, ref Tolerance tolerance, bool topLevelComparison)
         {
             // Issue #70 - EquivalentTo isn't compatible with IgnoreCase for dictionaries
             if (!(x is DictionaryEntry) || !(y is DictionaryEntry))

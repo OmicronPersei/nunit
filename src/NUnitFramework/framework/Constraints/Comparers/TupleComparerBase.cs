@@ -42,7 +42,7 @@ namespace NUnit.Framework.Constraints.Comparers
 
         protected abstract object GetValue(Type type, string propertyName, object obj);
 
-        public bool? Equal(object x, object y, ref Tolerance tolerance, bool topLevelComparison = true)
+        public bool? Equal(object x, object y, ref Tolerance tolerance, bool topLevelComparison)
         {
             Type xType = x.GetType();
             Type yType = y.GetType();
