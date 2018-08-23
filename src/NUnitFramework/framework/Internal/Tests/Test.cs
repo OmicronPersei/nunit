@@ -248,11 +248,31 @@ namespace NUnit.Framework.Internal
 
         #region Other Public Properties
 
+        private static string _idPrefix;
+
         /// <summary>
         /// Static prefix used for ids in this AppDomain.
         /// Set by FrameworkController.
         /// </summary>
-        public static string IdPrefix { get; set; }
+        public static string IdPrefix
+        {
+            get { return _idPrefix; }
+            set
+            {
+                _idPrefix = value;
+                if (value == null || !value.StartsWith("ID"))
+                {
+
+
+#if !NETSTANDARD1_4
+                    System.Diagnostics.StackTrace t = new System.Diagnostics.StackTrace();
+                    System.Console.WriteLine($"Setting IdPrefix to something bad" + Environment.NewLine + t.ToString());
+
+                    #endif
+                }
+                
+            }
+        }
 
         /// <summary>
         /// Gets or Sets the Int value representing the seed for the RandomGenerator
