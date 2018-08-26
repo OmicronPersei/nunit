@@ -265,7 +265,7 @@ namespace NUnit.Framework.Internal
 
 
 #if !NETSTANDARD1_4
-                    System.Diagnostics.StackTrace t = new System.Diagnostics.StackTrace();
+                    System.Diagnostics.StackTrace t = new System.Diagnostics.StackTrace(true);
                     System.Console.WriteLine($"Setting IdPrefix to something bad" + Environment.NewLine + t.ToString());
 
                     #endif
