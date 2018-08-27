@@ -27,12 +27,19 @@
 
 using System.Collections.Generic;
 using System.Xml.Linq;
+using NUnit.Framework.Internal;
 using NUnit.TestUtilities;
 
 namespace NUnit.Framework.Api
 {
     public static class SchemaTests
     {
+        [TearDown]
+        public static void TearDown()
+        {
+            Test.IdPrefix = "ID";
+        }
+
         [Test]
         public static void TestSchemaIsValid()
         {

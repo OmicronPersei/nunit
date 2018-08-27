@@ -83,6 +83,12 @@ namespace NUnit.Framework.Api
             _handler = new CallbackEventHandler();
         }
 
+        [TearDown]
+        public void TearDown()
+        {
+            Test.IdPrefix = "ID";
+        }
+
         #region SettingsElement Tests
 
         [TestCaseSource(nameof(SettingsData))]
